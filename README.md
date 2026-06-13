@@ -167,10 +167,9 @@ Before initializing Paprika, your host environment must have **OpenSSL** install
 For production or standard daemonized usage, install the pre-compiled package directly via pip:
 
 ```bash
-pip install paprika-anonproxy
+pip install paprika-proxy
 
 ```
-*i couldn't get a clean name:)
 
 ### Installation
 
