@@ -1,0 +1,102 @@
+{
+    "leaky_headers": [
+        "dnt",
+        "sec-gpc",
+        "upgrade-insecure-requests"
+    ],
+    "strict_prefixes": [
+        "sec-ch-ua"
+    ],
+    "browser_profiles": {
+        "chrome124": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Not-A.Brand\";v=\"99\", \"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "js_spoof": {
+                "platform": "Win32",
+                "hardwareConcurrency": 8,
+                "deviceMemory": 8,
+                "is_chrome": true,
+                "webgl_vendor": "Google Inc. (NVIDIA)",
+                "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+                "hardware_metrics": {
+                    "screenWidth": 1920,
+                    "screenHeight": 1080,
+                    "availWidth": 1920,
+                    "availHeight": 1040,
+                    "colorDepth": 24,
+                    "pixelRatio": 1,
+                    "timezone": "America/New_York",
+                    "timezoneOffset": 300,
+                    "locale": "en-US"
+                },
+                "audio_noise_seed": 0.0001,
+                "canvas_r_shift": 1,
+                "canvas_g_shift": 1,
+                "canvas_b_shift": 1,
+                "canvas_poison_alpha": 0.004
+            }
+        },
+        "firefox135": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "js_spoof": {
+                "platform": "Win32",
+                "hardwareConcurrency": 12,
+                "deviceMemory": null, 
+                "is_chrome": false,
+                "webgl_vendor": "Mozilla LLC",
+                "webgl_renderer": "ANGLE (AMD, AMD Radeon RX 7800 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+                "hardware_metrics": {
+                    "screenWidth": 2560,
+                    "screenHeight": 1440,
+                    "availWidth": 2560,
+                    "availHeight": 1400,
+                    "colorDepth": 24,
+                    "pixelRatio": 1.25,
+                    "timezone": "America/Chicago",
+                    "timezoneOffset": 360,
+                    "locale": "en-US"
+                },
+                "audio_noise_seed": 0.0001,
+                "canvas_r_shift": 1,
+                "canvas_g_shift": 1,
+                "canvas_b_shift": 1,
+                "canvas_poison_alpha": 0.004
+            }
+        },
+        "safari184": {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "js_spoof": {
+                "platform": "MacIntel",
+                "hardwareConcurrency": 8,
+                "deviceMemory": null,
+                "is_chrome": false,
+                "webgl_vendor": "Apple Inc.",
+                "webgl_renderer": "Apple GPU",
+                "hardware_metrics": {
+                    "screenWidth": 1728,
+                    "screenHeight": 1117,
+                    "availWidth": 1728,
+                    "availHeight": 1032,
+                    "colorDepth": 30,
+                    "pixelRatio": 2,
+                    "timezone": "America/Los_Angeles",
+                    "timezoneOffset": 480,
+                    "locale": "en-US"
+                },
+                "audio_noise_seed": 0.0001,
+                "canvas_r_shift": 1,
+                "canvas_g_shift": 1,
+                "canvas_b_shift": 1,
+                "canvas_poison_alpha": 0.004
+            }
+        }
+    }
+}
