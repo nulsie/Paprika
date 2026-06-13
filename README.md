@@ -170,7 +170,6 @@ For production or standard daemonized usage, install the pre-compiled package di
 pip install paprika-proxy
 
 ```
-*i couldn't get a clean name:)
 
 ### Installation
 
