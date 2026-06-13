@@ -176,7 +176,7 @@ pip install paprika-proxy
 **Via GitHub:**
 
 ```bash
-git clone https://github.com/yourusername/paprika.git
+git clone https://github.com/nulsie/Paprika.git
 cd paprika
 pip install -r requirements.txt
 
@@ -185,7 +185,7 @@ pip install -r requirements.txt
 **Via Codeberg:**
 
 ```bash
-git clone https://codeberg.org/yourusername/paprika.git
+git clone https://codeberg.org/nulsie/Paprika.git
 cd paprika
 pip install -r requirements.txt
 
