@@ -29,13 +29,13 @@ def get_paprika_storage_dir() -> Path:
     home = Path.home()
     
     if sys.platform == "win32":
-        # Windows AppData (Roaming) directory
+        # windows AppData (Roaming) directory
         base_dir = Path(os.environ.get("APPDATA", home / "AppData" / "Roaming"))
     elif sys.platform == "darwin":
-        # macOS standard Application Support directory
+        # macos standard application support directory
         base_dir = home / "Library" / "Application Support"
     else:
-        # Linux/Unix standard XDG Config specification fallback
+        # linux/Unix standard XDG Config specification fallback
         base_dir = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
         
     storage_path = base_dir / "paprika"
@@ -53,7 +53,7 @@ def load_configuration() -> Dict[str, Any]:
     config_path = storage_dir / "paprika_config.json"
     
     if not config_path.exists():
-        # Fallback dictionary to auto-bootstrap configurations
+        # fallback dictionary to auto-bootstrap configurations
         default_config = {
             "leaky_headers": ["dnt", "sec-gpc", "upgrade-insecure-requests"],
             "strict_prefixes": ["sec-ch-ua"],
@@ -95,23 +95,19 @@ def load_configuration() -> Dict[str, Any]:
         sys.exit(1)
     
 def ensure_ca_certificates() -> tuple[Path, Path, Path]:
-    """
-    Maintains and provisions Root CA validation profiles without requiring 
-    external cryptographic wheels or local compiler stacks.
-    """
     storage_dir = get_paprika_storage_dir()
     
     ca_key_path = storage_dir / "ca-key.pem"
     ca_cert_path = storage_dir / "ca-cert.pem"
     
-    # Check if files have already been initialized on a previous run
+    # check if files have already been initialized on a previous run
     if ca_key_path.exists() and ca_cert_path.exists():
         print(f"[+] Using existing CA credentials found at: {storage_dir}")
         return ca_key_path, ca_cert_path
 
     print("[*] Certificates not found. Initiating automated cross-platform provisioning...")
     
-    # Look for system OpenSSL binary wrapper path
+    # look for system openssl binary wrapper path
     if not shutil.which("openssl"):
         print("[-] Critical Error: 'openssl' executable could not be resolved on system PATH.", file=sys.stderr)
         if sys.platform == "win32":
@@ -124,7 +120,7 @@ def ensure_ca_certificates() -> tuple[Path, Path, Path]:
         
     try:
         print("[*] Generating 2048-bit Root CA Private Key...")
-        # Step 1: Create local root infrastructure key
+        # step 1: create local root infrastructure key
         subprocess.run(
             ["openssl", "genrsa", "-out", str(ca_key_path), "2048"],
             check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -136,8 +132,8 @@ def ensure_ca_certificates() -> tuple[Path, Path, Path]:
             print(f"[!] Warning: Could not lock down private key permissions: {e}", file=sys.stderr)
         
         print("[*] Generating Self-Signed Root CA Certificate (Valid for 10 Years)...")
-        # Step 2: Form self-signed root verification profile.
-        # Subject identifiers prevent the terminal from pausing for user input during startup.
+        # step 2: form self-signed root verification profile.
+        # subject identifiers prevent the terminal from pausing for user input during startup.
         subj_string = "/CN=Paprika Privacy Proxy Root CA/O=Paprika Security/C=US"
         
         subprocess.run(
@@ -180,7 +176,7 @@ class PaprikaClient:
 
         final_headers = self.base_headers.copy()
         
-        # Define headers that must dynamically adapt to the specific asset or API being requested
+        # define headers that must dynamically adapt to the specific asset or API being requested
         CONTEXT_HEADERS = {
             'accept', 
             'accept-encoding', 
@@ -197,24 +193,24 @@ class PaprikaClient:
             for k, v in headers.items():
                 k_lower = k.lower()
         
-                # 1. Always prioritize contextual request payload headers
+                # 1. always prioritize contextual request payload headers
                 if k_lower in CONTEXT_HEADERS:
                     final_headers[k] = v
                     continue
         
-                # 2. Skip headers that are already handled by the static browser profile
+                # 2. skip headers that are already handled by the static browser profile
                 if k_lower in self.base_headers_lower:
                     continue
         
-                # 3. Strip out known leaky proxy/tracking headers
+                # 3. strip out known leaky proxy headers
                 if k_lower in self.leaky_headers:
                     continue
         
-                # 4. Enforce strict prefix stripping (like sec-ch-ua metadata)
+                # 4. enforce strict prefix stripping (like sec-ch-ua metadata)
                 if self.strict_prefixes and k_lower.startswith(self.strict_prefixes):
                     continue
         
-                # 5. Append any remaining safe headers
+                # 5. append any remaining safe headers
                 final_headers[k] = v
 
         session = kwargs.pop('session')
@@ -260,7 +256,7 @@ class ProfileRotator:
         profile = copy.deepcopy(config_data.get("browser_profiles", {}).get(base_profile_name, {}))
         js_spoof = profile.get("js_spoof", {})
 
-        # Plausible Hardware Rotation
+        # plausible hardware rotation
         if js_spoof.get("platform") == "Win32":
             js_spoof["webgl_renderer"] = random.choice(cls.NVIDIA_GPUS + cls.AMD_GPUS)
             js_spoof["webgl_vendor"] = "Google Inc. (NVIDIA)" if "NVIDIA" in js_spoof["webgl_renderer"] else "Google Inc. (AMD)"
@@ -268,13 +264,13 @@ class ProfileRotator:
             js_spoof["webgl_renderer"] = random.choice(cls.APPLE_GPUS)
             js_spoof["webgl_vendor"] = "Apple Inc."
 
-        # Minor Version Jitter
+        # minor version jitter
         if "chrome" in base_profile_name:
             new_ua, new_sec = cls.mutate_chrome_version(profile["User-Agent"], profile["sec-ch-ua"])
             profile["User-Agent"] = new_ua
             profile["sec-ch-ua"] = new_sec
 
-        # Dynamic Noise Seeds
+        # dynamic noise seeds
         js_spoof["audio_noise_seed"] = random.uniform(0.00001, 0.00009)
         js_spoof["canvas_r_shift"] = random.choice([-1, 1])
         js_spoof["canvas_g_shift"] = random.choice([-1, 1])
@@ -285,14 +281,10 @@ class ProfileRotator:
         return profile
 
 class PaprikaProxyPlugin(HttpProxyBasePlugin):
-    """
-    proxy.py Plugin that intercepts incoming HTTP/HTTPS traffic from the local browser
-    and routes it entirely through the PaprikaClient to spoof TLS and Headers.
-    """
     TARGET_BROWSER = "chrome124"
     CONFIG_DATA: Dict[str, Any] = {}
 
-    # Upgraded from a single instance to a dynamic pool mapping profiles to clients
+    # upgraded from a single instance to a dynamic pool mapping profiles to clients
     _client_pool: Dict[str, Any] = {}
 
     _session_spoof_cache: Dict[str, dict] = {}
@@ -302,22 +294,22 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
         self.session: Optional[AsyncSession] = None
 
     async def handle_client_request(self, request: HttpParser) -> Optional[HttpParser]:
-        # Allow CONNECT method to pass through so proxy.py handles the MITM TLS Decryption
+        # allow CONNECT method to pass through so proxy.py handles the MITM TLS decryption
         if request.method == b"CONNECT":
             return request
 
         if self.session is None:
             self.session = AsyncSession()
 
-        # Extract User-Agent early for dynamic profile alignment
+        # extract user-agent early for dynamic profile alignment
         user_agent_str = ""
         for k, v in request.headers.items():
             if k.lower() == b'user-agent':
                 user_agent_str = v[1].decode('utf-8', errors='ignore')
                 break
 
-        # Dynamic Profile Selection Logic
-        target_profile = self.TARGET_BROWSER  # Use CLI argument as the ultimate fallback
+        # dynamic profile selection logic
+        target_profile = self.TARGET_BROWSER  # use CLI argument as the ultimate fallback
         available_profiles = self.CONFIG_DATA.get("browser_profiles", {})
 
         if "Firefox" in user_agent_str:
@@ -327,21 +319,21 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
         elif "Safari" in user_agent_str and "Mac" in user_agent_str and "Chrome" not in user_agent_str:
             target_profile = "safari184" if "safari184" in available_profiles else target_profile
 
-        # Fallback safeguard in case the guessed target profile doesn't exist
+        # fallback safeguard in case the guessed target profile doesn't exist
         if target_profile not in available_profiles and available_profiles:
             target_profile = list(available_profiles.keys())[0]
 
-        # Initialize or retrieve the matched client from the pool
+        # initialize or retrieve the matched client from the pool
         if target_profile not in PaprikaProxyPlugin._client_pool:
             PaprikaProxyPlugin._client_pool[target_profile] = PaprikaClient(
                 config=self.CONFIG_DATA,
                 target_browser=target_profile
             )
                     
-        # Bind the dynamically matched instance for this specific request iteration
+        # nind the dynamically matched instance for this specific request iteration
         paprika = PaprikaProxyPlugin._client_pool[target_profile]
 
-        # Construct target URL
+        # construct target URL
         host = request.host.decode('utf-8') if request.host else ""
         port = request.port if request.port else 80
         path = request.path.decode('utf-8') if request.path else "/"
@@ -352,7 +344,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
             scheme = "https" if port == 443 else "http"
             url = f"{scheme}://{host}:{port}{path}"
 
-        # Extract client headers (filtering out proxy/hop-by-hop headers)
+        # extract client headers (filtering out proxy/hop-by-hop headers)
         client_headers = {}
         for k, v in request.headers.items():
             key_str = k.decode('utf-8')
@@ -360,7 +352,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
                 client_headers[key_str] = v[1].decode('utf-8')
 
         try:
-            # Send using curl_cffi to mask TLS/Headers via the dynamically chosen client
+            # send using curl_cffi to mask tls/headers via the dynamically chosen client
             response = await paprika.send(
                 method=request.method.decode('utf-8'),
                 url=url,
@@ -370,7 +362,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
                 allow_redirects=False
             )
         
-            # Reconstruct response headers to send back to the browser
+            # reconstruct response headers to send back to the browser
             resp_headers = {}
             csp_headers = []
             
@@ -396,7 +388,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
             body = response.content
             content_type = response.headers.get("content-type", "").lower()
         
-            # Execute active JavaScript execution ecosystem spoofing if content type is HTML
+            # execute active JavaScript execution ecosystem spoofing if content type is HTML
             if "text/html" in content_type:
 
                 session_key = f"{target_profile}:{host}"
@@ -409,7 +401,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
 
                 json_payload = json.dumps(js_data).replace("</", "<\\/")
                     
-                # High-performance native wrapper designed to preserve prototype .toString() metrics
+                # high-performance native wrapper designed to preserve prototype .toString() metrics
                 js_content_str = """
                 (function() {
                     const paprikaStealthCore = function(spoofData) {
@@ -658,7 +650,7 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
                         if not parts: continue
                                                     
                         name = parts[0].lower()
-                        # Inject hash into script directives so the browser natively allows it
+                        # inject hash into script directives so the browser natively allows it
                         if name in ('script-src', 'script-src-elem', 'default-src'):
                             if csp_hash_directive not in parts:
                                 directives[i] = directive + f" {csp_hash_directive}"
@@ -705,10 +697,10 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
                     if not injected:
                         body = stealth_js_payload + body
         
-            # Recalculate content length based on decoded and altered payload
+            # recalculate content length based on decoded and altered payload
             resp_headers[b'Content-Length'] = str(len(body)).encode('utf-8')
         
-            # Write the spoofed HTTP response back to the browser
+            # write the spoofed HTTP response back to the browser
             self.client.queue(
                 memoryview(
                     build_http_response(
@@ -735,7 +727,6 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
         return None
 
     def on_client_connection_close(self) -> None:
-        """Safely tears down the session when the browser closes the socket."""
         if self.session is not None:
             try:
                 loop = asyncio.get_running_loop()
@@ -745,7 +736,6 @@ class PaprikaProxyPlugin(HttpProxyBasePlugin):
                 pass
 
 def set_system_proxy(enable: bool, port: int = 8899):
-    """Automatically configures Windows, macOS, or Linux (GNOME) system proxy settings."""
     try:
         if sys.platform == "win32":
             import winreg
@@ -756,7 +746,7 @@ def set_system_proxy(enable: bool, port: int = 8899):
             winreg.CloseKey(key)
     
         elif sys.platform == "darwin":
-            # Mac settings (assumes Wi-Fi is the primary interface)
+            # mac settings (assumes Wi-Fi is the primary interface)
             state = "on" if enable else "off"
             for proto in ["web", "secureweb"]:
                 if enable:
@@ -764,7 +754,7 @@ def set_system_proxy(enable: bool, port: int = 8899):
                 subprocess.run(["networksetup", f"-set{proto}proxystate", "Wi-Fi", state], capture_output=True)
     
         elif sys.platform.startswith("linux"):
-            # Linux GNOME settings
+            # linux gnome settings
             mode = "manual" if enable else "none"
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", f"'{mode}'"], capture_output=True)
             if enable:
@@ -863,17 +853,17 @@ def main(custom_args=None):
         print(f"[*] Starting Paprika Proxy on 127.0.0.1:{args.port}")
         print(f"[*] Impersonating: {args.browser}")
             
-        # Inject the desired browser into the Proxy Plugin
+        # inject the desired browser into the Proxy Plugin
         PaprikaProxyPlugin.TARGET_BROWSER = args.browser
     
-        # Base proxy.py arguments
+        # base proxy.py arguments
         proxy_args = [
             '--port', str(args.port),
             '--plugins', f'{__name__}.PaprikaProxyPlugin',
             '--threadless' 
         ]
     
-        # Smart credential assessment: Use custom paths if available, otherwise launch automated engine
+        # smart credential assessment: Use custom paths if available, otherwise launch automated engine
         if args.ca_key_file and args.ca_cert_file and args.ca_signing_key:
             key_file = args.ca_key_file
             cert_file = args.ca_cert_file
@@ -886,7 +876,7 @@ def main(custom_args=None):
             cert_file = str(ca_cert)
             signing_file = str(ca_key)
     
-        # Inject final targets into proxy stack configuration
+        # inject final targets into proxy stack configuration
         proxy_args.extend([
             '--ca-key-file', key_file,
             '--ca-cert-file', cert_file,
@@ -896,7 +886,7 @@ def main(custom_args=None):
     
         with Proxy(proxy_args):
             try:
-                # Enable OS proxy automatically
+                # enable os proxy automatically
                 set_system_proxy(enable=True, port=args.port)
                 print(f"[+] System proxy automatically routed to 127.0.0.1:{args.port}")
                 print("[*] Proxy is running. Press Ctrl+C to stop.")
@@ -905,7 +895,7 @@ def main(custom_args=None):
             except KeyboardInterrupt:
                 print("\n[*] Shutting down Paprika Proxy gracefully.")
             finally:
-                # Ensure OS proxy is restored even if the script crashes
+                # ensure os proxy is restored even if the script crashes
                 set_system_proxy(enable=False)
                 print("[+] System proxy restored to normal.")
 
@@ -923,7 +913,7 @@ def interactive_cli():
             base_command = parsed_args[0].lower()
             
             if base_command == "start":
-                # Pass the arguments (excluding the 'start' keyword) to argparse
+                # pass the arguments (excluding the 'start' keyword) to argparse
                 main(parsed_args[1:])
                 
             elif base_command == "exit":
@@ -939,9 +929,9 @@ def interactive_cli():
             break
 
 if __name__ == "__main__":
-    # If standard terminal arguments are passed (e.g. python paprika.py --mode fetch), run normally
+    # if standard terminal arguments are passed (e.g. python paprika.py --mode fetch), run normally
     if len(sys.argv) > 1:
         main()
-    # Otherwise, drop into the interactive shlex shell
+    # otherwise, drop into the interactive shlex shell
     else:
         interactive_cli()
