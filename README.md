@@ -253,4 +253,8 @@ paprika --mode proxy --port 8899 --browser safari184
 -----
 
 **Author**: nulsie
+<<<<<<< HEAD
 **License**: GNU GPL v3
+=======
+**License**: GNU GPL v3
+>>>>>>> 3912bda26b9bafa283f04fd40bbf5dc4302b8b1d
