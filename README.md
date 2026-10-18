@@ -160,7 +160,7 @@ Before initializing Paprika, your host environment must have **OpenSSL** install
 
 * **Windows:** `winget install OpenSSL.OpenSSL` (or via Git for Windows)
 * **macOS:** `brew install openssl`
-* **Linux:** `sudo apt install openssl`
+* **Linux:** `sudo <your pkg manager> install openssl`
 
 ### Installation via pip
 
