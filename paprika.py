@@ -26,10 +26,6 @@ from curl_cffi.const import CurlHttpVersion
 from pathlib import Path
 
 def get_paprika_storage_dir() -> Path:
-    """
-    Determines and builds the canonical configuration and storage directory
-    based on the running Operating System following local specifications.
-    """
     home = Path.home()
     
     if sys.platform == "win32":
@@ -53,10 +49,6 @@ def get_paprika_storage_dir() -> Path:
     return storage_path
 
 def load_configuration() -> Dict[str, Any]:
-    """
-    Loads JSON engine configurations and profiles dynamically. 
-    Bootstraps file structure with reliable initial fallbacks if missing.
-    """
     storage_dir = get_paprika_storage_dir()
     config_path = storage_dir / "paprika_config.json"
     
@@ -170,11 +162,6 @@ def ensure_ca_certificates() -> tuple[Path, Path, Path]:
     return ca_key_path, ca_cert_path
 
 class PaprikaClient:
-    """
-    PaprikaClient wraps curl_cffi to ensure that TLS fingerprints, 
-    HTTP/2 settings, and HTTP headers are perfectly synchronized 
-    to mimic legitimate consumer browsers.
-    """
 
     def __init__(self, config: Dict[str, Any], target_browser: str):
         self.profiles = config.get("browser_profiles", {})
@@ -243,10 +230,6 @@ class PaprikaClient:
         )
 
 class ProfileRotator:
-    """
-    Dynamically mutates browser profiles to prevent static fingerprinting.
-    Locks hardware combinations to maintain plausibility.
-    """
     NVIDIA_GPUS = [
         "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
         "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Direct3D11 vs_5_0 ps_5_0, D3D11)",
